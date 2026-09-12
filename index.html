@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Расписание Л-22</title>
+  <meta name="theme-color" content="#f3eee4" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23F6F1E8'/%3E%3Cpath fill='%231A1612' d='M7 6h5.2v14.6H24V25.4H7z'/%3E%3Crect x='7' y='27.2' width='18' height='1.6' rx='0.8' fill='%233D5A80'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #f3eee4;
+      --surface: #fbf7f0;
+      --sunken: #ebe4d7;
+      --ink: #1a1612;
+      --muted: #6f675c;
+      --line: rgba(26, 22, 18, 0.12);
+      --accent: #3d5a80;
+      --accent-fg: #fbf7f0;
+      --shadow: 0 0 0 1px rgba(26, 22, 18, 0.06), 0 2px 8px rgba(26, 22, 18, 0.04);
+      --sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+      --display: "Newsreader", Georgia, "Times New Roman", serif;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-font-smoothing: antialiased; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+    button { font: inherit; color: inherit; cursor: pointer; }
+    .wrap {
+      max-width: 64rem;
+      margin: 0 auto;
+      padding: 2rem 1rem 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    @media (min-width: 640px) { .wrap { padding: 3rem 1.5rem 5rem; } }
+    .eyebrow {
+      margin: 0;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    h1 {
+      margin: 0.35rem 0 0;
+      font-family: var(--display);
+      font-size: clamp(2.2rem, 5vw, 3rem);
+      font-weight: 500;
+      letter-spacing: -0.03em;
+    }
+    .clock { margin: 0.5rem 0 0; color: var(--muted); font-size: 0.9rem; }
+    .card {
+      background: var(--surface);
+      border-radius: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .panel { padding: 1.25rem; }
+    @media (min-width: 640px) { .panel { padding: 1.75rem; } }
+    .muted { color: var(--muted); font-size: 0.9rem; }
+    .date-title {
+      margin: 0.25rem 0 0;
+      font-family: var(--display);
+      font-size: clamp(1.5rem, 3vw, 1.85rem);
+      font-weight: 500;
+    }
+    .row { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+    .days { display: flex; gap: 0.5rem; overflow-x: auto; margin-top: 1.5rem; padding-bottom: 0.25rem; }
+    .day-btn {
+      min-width: 3rem;
+      min-height: 2.75rem;
+      border: 0;
+      border-radius: 0.5rem;
+      padding: 0.4rem 0.75rem;
+      background: var(--sunken);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .day-btn span:first-child {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+    .day-btn.on { background: var(--ink); color: var(--bg); }
+    .week-pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: var(--accent);
+      color: var(--accent-fg);
+      white-space: nowrap;
+    }
+    .ghost {
+      height: 2.75rem;
+      border: 0;
+      background: transparent;
+      padding: 0 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .ghost:hover { background: var(--sunken); }
+    .lessons { overflow: hidden; }
+    .lesson {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .lesson:last-child { border-bottom: 0; }
+    @media (min-width: 640px) { .lesson { gap: 1.5rem; padding: 1.25rem 1.75rem; } }
+    .lesson.past { opacity: 0.45; }
+    .lesson.now { background: rgba(61, 90, 128, 0.08); }
+    .time { width: 4rem; }
+    @media (min-width: 640px) { .time { width: 6rem; } }
+    .time .start { margin: 0; font-size: 0.9rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+    .time .end { margin: 0.25rem 0 0; font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+    .title { margin: 0; font-size: 1.05rem; font-weight: 500; line-height: 1.3; }
+    .meta { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; color: var(--muted); font-size: 0.9rem; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.2rem 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: var(--sunken);
+    }
+    .badge.outline { background: transparent; box-shadow: 0 0 0 1px var(--line); color: var(--muted); }
+    .off { text-align: center; padding: 4rem 1.5rem; }
+    .off h2 { margin: 0; font-family: var(--display); font-size: 1.8rem; font-weight: 500; }
+    .week-head {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+    .week-grid { display: grid; gap: 0.75rem; }
+    @media (min-width: 640px) { .week-grid { grid-template-columns: 1fr 1fr; } }
+    .week-card { background: var(--surface); border-radius: 0.9rem; padding: 1rem; box-shadow: var(--shadow); }
+    .week-card.sel { box-shadow: var(--shadow), 0 0 0 2px rgba(61, 90, 128, 0.3); }
+    .week-card h3 { margin: 0; font-family: var(--display); font-size: 1.25rem; font-weight: 500; }
+    .today-mark { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+    .week-card ul { list-style: none; margin: 0.75rem 0 0; padding: 0; }
+    .week-card li { display: flex; gap: 0.75rem; font-size: 0.9rem; margin-top: 0.4rem; }
+    .week-card .t { width: 2.75rem; flex: none; color: var(--muted); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="app"></div>
+  <script>
+    const TIMEZONE = "Europe/Minsk";
+    const DAY_NAMES = ["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"];
+    const DAY_SHORT = ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+    // Метка в конце строки: #L — лекция (общий поток с Л-21), #P — практика/семинар (только Л-22)
+    const SCHEDULE = {
+      0: {
+        above: [
+          "09:50 — 10:35 | 1-14 Статистика (доц. Козырева Н. Н.) #L",
+          "10:50 — 12:25 | 1-38, 1-39a Товароведение прод. тов. (доц. Бань М. Ф., доц Рощина Е. В.) #P",
+          "12:55 — 14:30 | Физра #P"
+        ],
+        under: [
+          "09:50 — 10:35 | 1-14 Статистика (доц. Козырева Н. Н.) #L",
+          "10:50 — 12:25 | 4-25 Статистика (пр. Лавшук Т. Н.) #P",
+          "12:55 — 14:30 | 1-22 Противодействие коррупции (доц. Аксеонов А. Н.) #P"
+        ]
+      },
+      1: {
+        above: [
+          "09:00 — 10:35 | 1-21 Теория вероятностей (доц. Грибовская М. А.) #P",
+          "10:50 — 12:25 | 1-2 Макроэкономика (доц. Алексеенко Т. С., ст. практ. Нилова Е. Е.) #L",
+          "12:55 — 14:30 | 1-14 Организация и технология торговли (ст.пр. Бурмистрова Н.А.) #L"
+        ],
+        under: [
+          "09:00 — 10:35 | 1-21 Теория вероятностей (доц. Грибовская М. А.) #P",
+          "10:50 — 12:25 | 1-2 Макроэкономика (доц. Алексеенко Т. С., ст. практ. Нилова Е. Е.) #L",
+          "14:40 — 15:25 | 4-25 Организация и правовое обеспечение предпринимательской деятельности (пр. ст. Адасенко А. И.) #P"
+        ]
+      },
+      2: {
+        above: [
+          "09:00 — 10:35 | 1-2 Макроэкономика (доц. Алексеенко Т. С., ст. практ. Нилова Е. Е.) #L",
+          "10:50 — 12:25 | 1-21 Высшая математика (пр. -ст. Сиротин Р. Р.) #P",
+          "12:55 — 14:30 | Физическая культура #P",
+          "14:40 — 15:25 | 1-6 Организация и правовое обеспечение предпринимательской деятельности (ст.пр. Миненко Е.В.) #L"
+        ],
+        under: [
+          "09:00 — 10:35 | 1-14 Организация и технология торговли (ст. пр. Бурмистова Н. А.) #L",
+          "10:50 — 12:25 | 1-21 Высшая математика (пр. -ст. Сиротин Р. Р.) #P",
+          "12:55 — 14:30 | Физическая культура #P",
+          "14:40 — 15:25 | 1-6 Товароведение продовольственных товаров (доц. Бань М. Ф.) #L"
+        ]
+      },
+      3: {
+        above: [
+          "10:50 — 12:25 | 4-26 Статистика (пр. Лавшук Т.Н.) #P",
+          "12:55 — 14:30 | 1-21 Теория вероятностей (доц. Грибовская М. А.) #L",
+          "14:40 — 16:15 | 1-13 Макроэкономика (доц. Алексеенко Т. С., ст. пр. Нилова С. С.) #P"
+        ],
+        under: [
+          "09:00 — 10:35 | 1-13 Макроэкономика (доц. Алексеенко Т. С.) #P",
+          "10:55 — 12:25 | 1-33, 1-36 Товароведение продовольственных товаров (доц. Бань М. Ф., доц. Рощина Е. В.) #P",
+          "12:55 — 14:30 | 1-6 Организация и правовое обеспечение предпринимательской деятельности (ст.пр. Миненко Е.В.) #L",
+          "14:40 — 16:15 | 1-6 Теория вероятностей (доц. Грибовская М. А.) #L"
+        ]
+      },
+      4: {
+        above: [
+          "10:50 — 12:25 | 1-6 Высшая математика (пр. Грибовская В.А.) #L",
+          "12:55 — 14:30 | 4-7 Организация и технология торговли (ст. пр. Бурмистова Н. А.) #P",
+          "14:40 — 16:15 | 1-30 Товароведение прод. тов. (доц. Бань М. Ф.) #L"
+        ],
+        under: [
+          "09:00 — 10:35 | 4-25 Статистика (пр. Лавшук Т.Н.) #P",
+          "10:50 — 12:25 | 1-6 Высшая математика (пр. Грибовская В.А.) #L",
+          "12:55 — 14:30 | 1-13 Макроэкономика (доц. Алексеенко Т. С., ст. пр. Нилова С. С.) #P",
+          "14:40 — 16:15 | М.А.З Противодействие коррупции (доц. Аксеонов А. Н.) #L"
+        ]
+      },
+      5: {
+        above: [
+          "09:00 — 10:35 | 1-22 Управление цепями поставок (доц. Соловьева Л.Л.) #L",
+          "10:50 — 12:25 | 1-13 Управление цепями поставок (доц. Соловьева Л.Л.) #P",
+          "12:55 — 14:30 | 1-22 Организация и правовое обеспечение предпринимательской деятельности (ст.пр. Миненко Е.В.) #P"
+        ],
+        under: [
+          "09:00 — 10:35 | 1-22 Управление цепями поставок (доц. Соловьева Л.Л.) #L",
+          "10:55 — 12:55 | 4-18 Организация и технология торговли (ст. пр. Бурмистова Н. А.) #P",
+          "12:55 — 14:30 | 1-22 Управление цепями поставок (доц. Соловьева Л.Л.) #P"
+        ]
+      },
+      6: { above: ["Выходной"], under: ["Выходной"] }
+    };
+
+    const ROOM_RE = /^((?:\d+-\d+(?:,\s*)?)+|[А-ЯЁ]\.[А-ЯЁ]\.\d+)\s+(.+)$/u;
+    let selectedOffset = 0;
+
+    function minskParts() {
+      const stamp = new Date().toLocaleString("sv-SE", { timeZone: TIMEZONE });
+      const [datePart, timePart = "00:00:00"] = stamp.split(" ");
+      const [year, month, day] = datePart.split("-").map(Number);
+      const [hours, minutes] = timePart.split(":").map(Number);
+      return {
+        date: new Date(Date.UTC(year, month - 1, day, 12)),
+        hours, minutes,
+        minutesTotal: hours * 60 + minutes,
+        label: String(hours).padStart(2,"0") + ":" + String(minutes).padStart(2,"0")
+      };
+    }
+    // Расчёт недели "над чертой" / "под чертой" по официальному календарю БТЭУ на 1 семестр 2026/2027.
+    // 01–06.09.2026 — над чертой (первая, неполная неделя), 07.09.2026 (пн) — старт "под чертой",
+    // дальше недели чередуются каждые 7 дней. Формула экстраполируется и за пределы декабря —
+    // если деканат поменяет порядок чередования во 2 семестре, эту дату нужно будет поправить.
+    function weekType(date) {
+      const anchor = Date.UTC(2026, 8, 7); // понедельник 07.09.2026 — начало недели "под чертой"
+      const d = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+      const diffDays = Math.floor((d - anchor) / 86400000);
+      if (diffDays < 0) return "above"; // 01–06.09.2026
+      const weekIndex = Math.floor(diffDays / 7);
+      return weekIndex % 2 === 0 ? "under" : "above";
+    }
+    function weekday(date) { const d = date.getUTCDay(); return d === 0 ? 6 : d - 1; }
+    function addDays(date, n) { const x = new Date(date); x.setUTCDate(x.getUTCDate() + n); return x; }
+    function longDate(date) {
+      return new Intl.DateTimeFormat("ru-RU", { day:"numeric", month:"long", year:"numeric", timeZone:"UTC" }).format(date);
+    }
+    function parseLesson(raw0) {
+      const km = raw0.match(/\s#(L|P)\s*$/);
+      const kind = km ? (km[1] === "L" ? "лекция" : "практика") : undefined;
+      const raw = km ? raw0.slice(0, km.index) : raw0;
+      const m = raw.match(/^(\d{2}:\d{2})\s*—\s*(\d{2}:\d{2})\s*\|\s*(.+)$/);
+      if (!m) return { start:"", end:"", title: raw.replace(/😴/g,"").trim() || "Выходной", isOff:true, raw };
+      const rest = m[3];
+      const tm = rest.match(/\(([^)]+)\)\s*$/);
+      const teacher = tm ? tm[1] : undefined;
+      const before = (tm ? rest.slice(0, tm.index) : rest).trim();
+      const rm = before.match(ROOM_RE);
+      return { start:m[1], end:m[2], room: rm ? rm[1].trim() : undefined, title: rm ? rm[2].trim() : before, teacher, kind, isOff:false, raw };
+    }
+    function lessonsFor(day, week) {
+      return (SCHEDULE[day]?.[week] || ["Пар нет"]).map(parseLesson);
+    }
+    function toMin(hhmm) {
+      const m = hhmm.match(/^(\d{2}):(\d{2})$/);
+      return m ? Number(m[1])*60 + Number(m[2]) : null;
+    }
+    function phases(lessons, now) {
+      const p = lessons.map((l) => {
+        if (l.isOff) return "off";
+        const s = toMin(l.start), e = toMin(l.end);
+        if (s == null || e == null) return "later";
+        if (now >= e) return "past";
+        if (now >= s) return "now";
+        return "later";
+      });
+      const i = p.indexOf("later");
+      if (i >= 0) p[i] = "next";
+      return p;
+    }
+    function esc(s) {
+      const d = document.createElement("div");
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function render() {
+      const now = minskParts();
+      const today = now.date;
+      const selected = addDays(today, selectedOffset);
+      const week = weekType(selected); // всегда авто — под выбранный день
+      const weekLabel = week === "above" ? "Над чертой" : "Под чертой";
+      const wd = weekday(selected);
+      const lessons = lessonsFor(wd, week);
+      const isToday = selectedOffset === 0;
+      const ph = isToday ? phases(lessons, now.minutesTotal) : lessons.map(() => "later");
+      const todayIdx = weekday(today);
+
+      const dayBtns = DAY_SHORT.map((label, i) => {
+        const offset = i - todayIdx;
+        const date = addDays(today, offset);
+        const on = selectedOffset === offset ? " on" : "";
+        return `<button class="day-btn${on}" data-offset="${offset}" type="button"><span>${label}</span><span>${String(date.getUTCDate()).padStart(2,"0")}</span></button>`;
+      }).join("");
+
+      let list;
+      if (lessons.length === 1 && lessons[0].isOff) {
+        list = `<section class="card off"><h2>Выходной</h2><p class="muted">Пар нет</p></section>`;
+      } else {
+        list = `<ol class="card lessons">${lessons.map((l, i) => {
+          const phase = ph[i];
+          const badge = isToday && phase === "now" ? `<span class="badge">сейчас</span>` : isToday && phase === "next" ? `<span class="badge outline">дальше</span>` : "";
+          const room = l.room ? `<span>ауд. ${esc(l.room)}</span>` : "";
+          const teacher = l.teacher ? `<span>${esc(l.teacher)}</span>` : "";
+          const kind = l.kind ? `<span class="badge outline">${esc(l.kind)}</span>` : "";
+          return `<li class="lesson ${phase}">
+            <div class="time"><p class="start">${esc(l.start)}</p><p class="end">${esc(l.end)}</p></div>
+            <div>
+              <div class="title-row"><p class="title">${esc(l.title)}</p>${badge}${kind}</div>
+              <div class="meta">${room}${teacher}</div>
+            </div>
+          </li>`;
+        }).join("")}</ol>`;
+      }
+
+      const weekCards = DAY_NAMES.slice(0,6).map((name, i) => {
+        const ls = lessonsFor(i, week);
+        const off = ls.length === 1 && ls[0].isOff;
+        const body = off ? `<p class="muted">Выходной</p>` : `<ul>${ls.map((l) =>
+          `<li><span class="t">${esc(l.start)}</span><span>${esc(l.title)}${l.room ? ` · ${esc(l.room)}` : ""}</span></li>`
+        ).join("")}</ul>`;
+        return `<article class="week-card${wd===i?" sel":""}">
+          <div class="row"><h3>${name}</h3>${todayIdx===i?`<span class="today-mark">сегодня</span>`:""}</div>
+          ${body}
+        </article>`;
+      }).join("");
+
+      document.getElementById("app").innerHTML = `
+        <header>
+          <p class="eyebrow">Группа Л-22</p>
+          <h1>Расписание</h1>
+          <p class="clock">Минск ${now.label}</p>
+        </header>
+        <section class="card panel">
+          <div class="row">
+            <div>
+              <p class="muted">${isToday ? "Сегодня" : DAY_NAMES[wd]}</p>
+              <div class="row" style="gap:0.6rem; align-items:baseline;">
+                <p class="date-title">${longDate(selected)}</p>
+                <span class="week-pill">${weekLabel}</span>
+              </div>
+            </div>
+            ${isToday ? "" : `<button class="ghost" type="button" id="to-today">К сегодня</button>`}
+          </div>
+          <div class="days">${dayBtns}</div>
+        </section>
+        ${list}
+        <section>
+          <div class="week-head">Неделя целиком (${weekLabel.toLowerCase()})</div>
+          <div class="week-grid" style="margin-top:1rem">${weekCards}</div>
+        </section>
+      `;
+
+      document.querySelectorAll(".day-btn").forEach((btn) => {
+        btn.addEventListener("click", () => { selectedOffset = Number(btn.dataset.offset); render(); });
+      });
+      const back = document.getElementById("to-today");
+      if (back) back.addEventListener("click", () => { selectedOffset = 0; render(); });
+    }
+
+    render();
+    setInterval(render, 30000);
+  </script>
+</body>
+</html>
